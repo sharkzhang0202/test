@@ -1,0 +1,139 @@
+{
+  "pages": [
+    {
+      "path": "pages/login/index",
+      "style": {}
+    },
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "智慧作业校园端",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/mine/index",
+      "style": {
+        "navigationBarTitleText": "我的",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/icon/index",
+      "style": {
+        "navigationBarTitleText": "Icon"
+      }
+    },
+    {
+      "path": "pages/fetchPage/index",
+      "style": {
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/components/index",
+      "style": {
+        "navigationBarTitleText": "组件",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/components/pages/drawer",
+      "style": {
+        "navigationBarTitleText": "抽屉/弹窗"
+      }
+    },
+    {
+      "path": "pages/components/pages/modal",
+      "style": {
+        "navigationBarTitleText": "抽屉/Modal"
+      }
+    },
+    {
+      "path": "pages/components/pages/nav-bar",
+      "style": {
+        "navigationBarTitleText": "导航栏",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/components/pages/echarts",
+      "style": {
+        "navigationBarTitleText": "图表"
+      }
+    },
+    {
+      "path": "pages/components/pages/loading",
+      "style": {
+        "navigationBarTitleText": "Loading"
+      }
+    },
+    {
+      "path": "pages/components/pages/empty",
+      "style": {
+        "navigationBarTitleText": "Empty"
+      }
+    },
+    {
+      "path": "pages/components/pages/calendar",
+      "style": {
+        "navigationBarTitleText": "日历"
+      }
+    },
+    {
+      "path": "pages/components/pages/color-picker",
+      "style": {
+        "navigationBarTitleText": "颜色选择器"
+      }
+    },
+    {
+      "path" : "pages/correction-detail/correction-detail",
+      "style" : 
+      {
+        "navigationBarTitleText" : "批改详情"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTitleText": "uni-app模板",
+    "backgroundColor": "@backgroundColor",
+    "navigationBarBackgroundColor": "@navBgColor",
+    "navigationBarTextStyle": "@navTxtStyle"
+  },
+  "easycom": {
+    "^guodu-(.*)": "@/widgets/guodu-$1/guodu-$1.vue",
+    "^shy-(.*)": "@/components/shy-$1/shy-$1.vue"
+  },
+  "tabBar": {
+    "color": "#8F9AA8",
+    "selectedColor": "#000333",
+    "borderStyle": "@tabbarBorderStyle",
+    "backgroundColor": "@navBgColor",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "iconPath": "static/icon/tabbar/index.png",
+        "selectedIconPath": "static/icon/tabbar/index-active.png",
+        "text": "作业"
+      },
+      {
+        "pagePath": "pages/components/index",
+        "iconPath": "static/icon/tabbar/correction.png",
+        "selectedIconPath": "static/icon/tabbar/correction-active.png",
+        "text": "批改"
+      },
+      {
+        "pagePath": "pages/login/index",
+        "iconPath": "static/icon/tabbar/learning-condition.png",
+        "selectedIconPath": "static/icon/tabbar/learning-condition-active.png",
+        "text": "学情"
+      },
+      {
+        "pagePath": "pages/mine/index",
+        "iconPath": "static/icon/tabbar/mine.png",
+        "selectedIconPath": "static/icon/tabbar/mine-active.png",
+        "text": "我的"
+      }
+    ]
+  }
+}
