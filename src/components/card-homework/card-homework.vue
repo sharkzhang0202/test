@@ -74,7 +74,7 @@ const stateStyle = computed(() => {
     </view>
     <view class="flex justify-between items-center">
       <view>
-        <view class="mb-[15rpx] text-[26rpx] font-bold text-[#000333]">
+        <view class="mb-[10rpx] text-[26rpx] font-bold text-[#000333]">
           <text class="text-[36rpx] text-[#00A76E]">
             {{ done }}
           </text>/{{ total }}

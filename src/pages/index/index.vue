@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { useFetchPage } from '~/composables/useFetchPage'
+import { api } from '~/config/api'
+
 // 自定义头部
 const tops = ref(0)
 const height = ref(0)
@@ -12,60 +15,68 @@ onReady(() => {
   })
 })
 
+// 选择日期代码逻辑
 function getDate(type: string) {
   const date = new Date()
   let year = date.getFullYear()
-  let month = date.getMonth() + 1
-
+  const month = date.getMonth() + 1
   if (type === 'start')
     year = year - 60
   else if (type === 'end')
     year = year + 2
-
-  month = Number(month > 9 ? month : `0${month}`)
-  return `${year}-${month}`
+  return `${year}/${month > 9 ? month : `0${month}`}`
 }
-const selectTime = ref(getDate(''))
-const startDate = computed(() => {
-  return getDate('start')
-})
-const endDate = computed(() => {
-  return getDate('end')
+const selectDate = ref(getDate(''))
+const startDate = computed(() => getDate('start'))
+const endDate = computed(() => getDate('end'))
+function handleSelectDate(e: { detail: { value: string } }) {
+  selectDate.value = e.detail.value.replace('-', '/')
+}
+interface HomeWorkList {
+  day: number
+  count: number
+}
+watch(selectDate, (value: string) => {
+  const [year, month] = value.split('/')
+  // 请求相关的
 })
 
-function handleSelectTime(e: { detail: { value: string } }) {
-  selectTime.value = e.detail.value
+// 选择班级代码逻辑
+const selectClass = ref('全部班级')
+const classList = ref<Array<string>>(['全部班级', '一班', '二班'])
+function handleSelectClass(e: { detail: { value: number } }) {
+  selectClass.value = classList.value[e.detail.value]
 }
 </script>
 
 <template>
-  <view class="index-bg px-[30rpx] pb-30rpx bg-[#f5f5f9] relative">
+  <view class="page-index top-bg pb-30rpx bg-[#f5f5f9] relative">
     <!-- 顶部日期部分 -->
     <view>
       <!-- 自定义头部导航栏 -->
-      <view class="mb-[25rpx]">
-        <view :style="[tops ? `height:${tops}px` : `height: 1.5rem`]" />
-        <view class="text-size-40 font-bold h-38" :style="[height ? `height:${height}px; line-height: ${height}px` : `height: auto; line-height: normal`]">
+      <view class="px-[30rpx] mb-[25rpx]">
+        <view :style="[tops ? `height:${tops}px` : `height: 1.2rem`]" />
+        <view class="text-40 font-bold h-38" :style="[height ? `height:${height}px; line-height: ${height}px` : `height: auto; line-height: normal`]">
           智慧作业教师端
         </view>
       </view>
       <!-- 选择年月 -->
-      <view class="mb-[30rpx] flex justify-between items-center">
+      <view class="px-[30rpx] mb-[30rpx] flex justify-between items-center">
         <view class="flex items-center">
           <text class="text-38 font-bold color-[#000333]">
-            <picker mode="date" :value="selectTime" :start="startDate" :end="endDate" fields="month" @change="handleSelectTime">
+            <picker mode="date" :value="selectDate" :start="startDate" :end="endDate" fields="month" @change="handleSelectDate">
               <view class="uni-input">
-                {{ selectTime }}
+                {{ selectDate }}
               </view>
             </picker>
           </text>
           <view class="i-carbon-chevron-down ml-[17rpx] text-28 text-[#778496]" />
         </view>
         <view class="p-x-[23rpx] bg-[#ffffff66] b b-[2px] border-[#fff] rounded-[18rpx] border-solid h-70 w-250 box-border">
-          <picker mode="selector">
+          <picker mode="selector" :value="selectClass" :range="classList" @change="handleSelectClass">
             <view class="flex h-66 justify-between items-center">
               <text class="text-26">
-                全部班级
+                {{ selectClass }}
               </text>
               <view class="i-carbon-chevron-down text-20 text-[#778496]" />
             </view>
@@ -75,7 +86,7 @@ function handleSelectTime(e: { detail: { value: string } }) {
       <!-- 选择天 -->
       <view class="mb-[30rpx]">
         <scroll-view class="whitespace-nowrap" scroll-x :show-scrollbar="false">
-          <view v-for="item in 29" :key="item" class="mx-[10rpx] inline-block">
+          <view v-for="item in 29" :key="item" class="day-item mx-[10rpx] inline-block">
             <view class="mx-auto bg-[#00A76E] rounded-[20rpx] text-[36rpx] font-bold line-height-[66rpx] text-center text-white h-[66rpx] w-[66rpx]">
               {{ item }}
             </view>
@@ -89,7 +100,7 @@ function handleSelectTime(e: { detail: { value: string } }) {
       <view />
     </view>
     <!-- 中间功能模块 -->
-    <view class="mb-[30rpx] grid grid-cols-4 gap-y-[30rpx]">
+    <view class="px-[30rpx] mb-[30rpx] grid grid-cols-4 gap-y-[30rpx]">
       <view>
         <view class="mx-auto h-100 w-120">
           <image class="h-full w-full" src="..\..\static\icon\index-setion\section1.png" mode="aspectFill" />
@@ -156,13 +167,24 @@ function handleSelectTime(e: { detail: { value: string } }) {
       </view>
     </view>
     <!-- 底部作业列表模块 -->
-    <view>
+    <view class="px-[30rpx]">
       <view v-for="item in 4" :key="item" class="mb-[30rpx]">
         <card-homework />
       </view>
+      <GuoduEmpty message="今天没有布置作业" />
     </view>
   </view>
 </template>
 
 <style lang="scss">
+.page-index {
+  .day-item {
+    &:first-child {
+      margin-left: 30rpx;
+    }
+    &:last-child {
+      margin-right: 30rpx;
+    }
+  }
+}
 </style>
