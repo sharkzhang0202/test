@@ -87,10 +87,11 @@
       }
     },
     {
-      "path" : "pages/correction-detail/correction-detail",
+      "path" : "pages/correction-detail/index",
       "style" : 
       {
-        "navigationBarTitleText" : "批改详情"
+        "navigationBarTitleText" : "批改详情",
+        "navigationStyle": "custom"
       }
     }
   ],
@@ -123,7 +124,7 @@
         "text": "批改"
       },
       {
-        "pagePath": "pages/login/index",
+        "pagePath": "pages/fetchPage/index",
         "iconPath": "static/icon/tabbar/learning-condition.png",
         "selectedIconPath": "static/icon/tabbar/learning-condition-active.png",
         "text": "学情"

@@ -106,6 +106,13 @@ function handleSelectClass(e: { detail: { value: number } }) {
   selectClass.value = classList.value[e.detail.value]
 }
 
+// 跳转页面
+function handleTo(name: string) {
+  uni.navigateTo({
+    url: `/pages/${name}/index`,
+  })
+}
+
 // 加载页面时获取当前月份的作业
 onLoad(() => {
   const [year, month] = selectDate.value.split('/')
@@ -116,7 +123,7 @@ onLoad(() => {
 <template>
   <view class="page-index top-bg pb-30rpx bg-[#f5f5f9] relative min-h-100vh">
     <!-- 遮罩层 -->
-    <view v-show="loading" class="bg-[#e5e5e5ed] flex-center fixed h-100vh w-100vw overflow-y-scroll bottom-0 left-0 right-0 top-0 z-10">
+    <view v-show="loading" class="bg-[#0000000d] flex-center fixed h-100vh w-100vw overflow-y-scroll bottom-0 left-0 right-0 top-0 z-10">
       <GuoduLoading type="dot-circle" class="m-3" />
     </view>
     <!-- 顶部日期部分 -->
@@ -152,7 +159,7 @@ onLoad(() => {
       <!-- 选择天 -->
       <view class="mb-[30rpx]">
         <scroll-view class="whitespace-nowrap" scroll-x :show-scrollbar="false">
-          <view v-for="({ id, day, count }, index) in dayList" :key="id" class="day-item mx-[10rpx] inline-block" @click="handleSelectDay(index)">
+          <view v-for="({ id, day, count }, index) in dayList" :key="id" class="day-item mx-[10rpx] inline-block" @tap="handleSelectDay(index)">
             <view :class="[curDay === index ? 'bg-[#00A76E] text-white font-bold' : 'bg-transparent text-[#000333]'] " class="mx-auto rounded-[20rpx] text-[36rpx] line-height-[66rpx] text-center h-[66rpx] w-[66rpx] transition-opacity">
               {{ day }}
             </view>
@@ -238,6 +245,7 @@ onLoad(() => {
         <card-homework
           :title="item.title" :type="item.type" :status="item.status" :start-time="item.start_time"
           :end-time="item.end_time" :total="item.total" :done="item.done"
+          @tap="handleTo('correction-detail')"
         />
       </view>
       <GuoduEmpty v-show="!homeworkList.length" message="今天没有布置作业" />
