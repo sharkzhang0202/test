@@ -1,16 +1,16 @@
 <script setup lang="ts">
 const props = withDefaults(defineProps<{
   title?: string
-  type?: string
-  state?: number
+  type?: number
+  status?: number
   startTime?: number
   endTime?: number
   total?: number
   done?: number
 }>(), {
   title: '标题',
-  type: '基础',
-  state: 3,
+  type: 0,
+  status: 3,
   startTime: new Date().getTime() / 1000,
   endTime: (new Date().getTime() + 24 * 60 * 60 * 1000) / 1000,
   total: Math.floor(Math.random() * 100) + 1,
@@ -18,21 +18,30 @@ const props = withDefaults(defineProps<{
 })
 // const emits = defineEmits(['more'])
 
-const stateMessage = computed(() => {
-  if (props.state === 1)
+// 计算status
+const statusMessage = computed(() => {
+  if (props.status === 1)
     return '已批改'
-  else if (props.state === 2)
+  else if (props.status === 2)
     return '未批改'
   else
     return '待批改'
 })
-const stateStyle = computed(() => {
-  if (props.state === 1)
+const statusStyle = computed(() => {
+  if (props.status === 1)
     return 'i-carbon-checkmark text-green'
-  else if (props.state === 2)
+  else if (props.status === 2)
     return 'i-carbon-help-filled text-yellow'
   else
     return 'i-carbon-hourglass text-[#8ca0c6]'
+})
+
+// 计算type
+const typeMessage = computed(() => {
+  if (props.type === 1)
+    return '基础'
+  else
+    return '标准'
 })
 </script>
 
@@ -41,16 +50,16 @@ const stateStyle = computed(() => {
     <view class="mb-[30rpx] flex justify-between">
       <view class="flex">
         <view class="px-[20rpx] py-[10rpx] bg-[#EBF6FF] rounded-[20rpx] text-[20rpx] font-bold text-[#0084FF]">
-          {{ type }}
+          {{ typeMessage }}
         </view>
         <view class="ml-[19rpx] text-[30rpx] font-bold text-[#000333]">
           {{ title }}
         </view>
       </view>
       <view class="flex items-center">
-        <view class="h-[24rpx] w-[24rpx]" :class="[stateStyle]" />
+        <view class="h-[24rpx] w-[24rpx]" :class="[statusStyle]" />
         <view class="ml-[12rpx] text-[22rpx] text-[#000333]">
-          {{ stateMessage }}
+          {{ statusMessage }}
         </view>
       </view>
     </view>

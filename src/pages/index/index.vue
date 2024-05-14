@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useFetchPage } from '~/composables/useFetchPage'
+import { Fetch } from '~/utils/fetch'
 import { api } from '~/config/api'
 
 // 自定义头部
@@ -15,7 +15,31 @@ onReady(() => {
   })
 })
 
-// 选择日期代码逻辑
+interface DayList {
+  id: string
+  day: number
+  count: number
+}
+interface HomeworkDetail {
+  id: string
+  type: number
+  total: number
+  title: string
+  status: number
+  start_time: number
+  end_time: number
+  done: number
+}
+interface HomeworkList {
+  count: number
+  list: Array<HomeworkDetail>
+  page_no: number
+  page_size: number
+}
+
+const loading = ref(false)
+
+// 选择年月代码逻辑
 function getDate(type: string) {
   const date = new Date()
   let year = date.getFullYear()
@@ -30,16 +54,50 @@ const selectDate = ref(getDate(''))
 const startDate = computed(() => getDate('start'))
 const endDate = computed(() => getDate('end'))
 function handleSelectDate(e: { detail: { value: string } }) {
-  selectDate.value = e.detail.value.replace('-', '/')
+  const [year, month] = e.detail.value.split('-')
+  selectDate.value = `${year}/${month}`
+  getDays(year, month)
 }
-interface HomeWorkList {
-  day: number
-  count: number
+
+// 选择选择天代码逻辑
+const dayList = ref<Array<DayList>>([])
+const curDay = ref(new Date().getDate() - 1)
+const homeworkList = ref<Array<HomeworkDetail>>([])
+async function handleSelectDay(index: number | undefined) {
+  if (curDay.value === index)
+    return
+  if (typeof index === 'number' && index !== curDay.value)
+    curDay.value = index
+
+  if (dayList.value[curDay.value].count === 0) {
+    homeworkList.value = []
+    return
+  }
+  // 发送请求渲染数据
+  loading.value = true
+  Fetch<HomeworkList>(api.getHomeworkDetail, { method: 'GET', data: { day: curDay.value + 1, count: dayList.value[curDay.value].count } }).then((data) => {
+    homeworkList.value = data.list
+    loading.value = false
+  }).catch(() => {
+    uni.showToast({
+      title: `获取${selectDate.value}下的天数失败`,
+    })
+  })
 }
-watch(selectDate, (value: string) => {
-  const [year, month] = value.split('/')
-  // 请求相关的
-})
+// 获取年/月下的天数及作业数量
+async function getDays(year: string, month: string) {
+  loading.value = true
+  Fetch<Array<DayList>>(api.getHomeworkList, { method: 'GET', data: { year, month } }).then((data) => {
+    curDay.value = 0
+    dayList.value = data
+    loading.value = false
+    handleSelectDay(undefined)
+  }).catch(() => {
+    uni.showToast({
+      title: `获取${selectDate.value}下的天数失败`,
+    })
+  })
+}
 
 // 选择班级代码逻辑
 const selectClass = ref('全部班级')
@@ -47,10 +105,20 @@ const classList = ref<Array<string>>(['全部班级', '一班', '二班'])
 function handleSelectClass(e: { detail: { value: number } }) {
   selectClass.value = classList.value[e.detail.value]
 }
+
+// 加载页面时获取当前月份的作业
+onLoad(() => {
+  const [year, month] = selectDate.value.split('/')
+  getDays(year, month)
+})
 </script>
 
 <template>
-  <view class="page-index top-bg pb-30rpx bg-[#f5f5f9] relative">
+  <view class="page-index top-bg pb-30rpx bg-[#f5f5f9] relative min-h-100vh">
+    <!-- 遮罩层 -->
+    <view v-show="loading" class="bg-[#e5e5e5ed] flex-center fixed h-100vh w-100vw overflow-y-scroll bottom-0 left-0 right-0 top-0 z-10">
+      <GuoduLoading type="dot-circle" class="m-3" />
+    </view>
     <!-- 顶部日期部分 -->
     <view>
       <!-- 自定义头部导航栏 -->
@@ -62,16 +130,14 @@ function handleSelectClass(e: { detail: { value: number } }) {
       </view>
       <!-- 选择年月 -->
       <view class="px-[30rpx] mb-[30rpx] flex justify-between items-center">
-        <view class="flex items-center">
-          <text class="text-38 font-bold color-[#000333]">
-            <picker mode="date" :value="selectDate" :start="startDate" :end="endDate" fields="month" @change="handleSelectDate">
-              <view class="uni-input">
-                {{ selectDate }}
-              </view>
-            </picker>
-          </text>
-          <view class="i-carbon-chevron-down ml-[17rpx] text-28 text-[#778496]" />
-        </view>
+        <picker class="h-full" mode="date" :value="selectDate" :start="startDate" :end="endDate" fields="month" @change="handleSelectDate">
+          <view class="flex relative items-center">
+            <text class="text-38 font-bold color-[#000333]">
+              {{ selectDate }}
+            </text>
+            <view class="i-carbon-chevron-down ml-[17rpx] text-28 text-[#778496]" />
+          </view>
+        </picker>
         <view class="p-x-[23rpx] bg-[#ffffff66] b b-[2px] border-[#fff] rounded-[18rpx] border-solid h-70 w-250 box-border">
           <picker mode="selector" :value="selectClass" :range="classList" @change="handleSelectClass">
             <view class="flex h-66 justify-between items-center">
@@ -86,13 +152,13 @@ function handleSelectClass(e: { detail: { value: number } }) {
       <!-- 选择天 -->
       <view class="mb-[30rpx]">
         <scroll-view class="whitespace-nowrap" scroll-x :show-scrollbar="false">
-          <view v-for="item in 29" :key="item" class="day-item mx-[10rpx] inline-block">
-            <view class="mx-auto bg-[#00A76E] rounded-[20rpx] text-[36rpx] font-bold line-height-[66rpx] text-center text-white h-[66rpx] w-[66rpx]">
-              {{ item }}
+          <view v-for="({ id, day, count }, index) in dayList" :key="id" class="day-item mx-[10rpx] inline-block" @click="handleSelectDay(index)">
+            <view :class="[curDay === index ? 'bg-[#00A76E] text-white font-bold' : 'bg-transparent text-[#000333]'] " class="mx-auto rounded-[20rpx] text-[36rpx] line-height-[66rpx] text-center h-[66rpx] w-[66rpx] transition-opacity">
+              {{ day }}
             </view>
-            <view class="mx-auto mb-[5rpx] mt-[10rpx] bg-[#00A76E] rounded-1/2 h-[12rpx] w-[12rpx]" />
-            <view class="text-[22rpx] line-height-[34rpx] text-center text-[#000333]">
-              5份作业
+            <view class="mx-auto mb-[5rpx] mt-[10rpx] bg-[#00A76E] rounded-1/2 h-[12rpx] w-[12rpx] transition-opacity" :class="[(count && curDay !== index) ? '' : 'opacity-0']" />
+            <view class="text-[22rpx] line-height-[34rpx] text-center text-[#000333] transition-opacity" :class="[(count && curDay === index) ? '' : 'opacity-0']">
+              {{ count }}份作业
             </view>
           </view>
         </scroll-view>
@@ -168,10 +234,13 @@ function handleSelectClass(e: { detail: { value: number } }) {
     </view>
     <!-- 底部作业列表模块 -->
     <view class="px-[30rpx]">
-      <view v-for="item in 4" :key="item" class="mb-[30rpx]">
-        <card-homework />
+      <view v-for="item in homeworkList" :key="item.id" class="mb-[30rpx]">
+        <card-homework
+          :title="item.title" :type="item.type" :status="item.status" :start-time="item.start_time"
+          :end-time="item.end_time" :total="item.total" :done="item.done"
+        />
       </view>
-      <GuoduEmpty message="今天没有布置作业" />
+      <GuoduEmpty v-show="!homeworkList.length" message="今天没有布置作业" />
     </view>
   </view>
 </template>

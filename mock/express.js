@@ -1,10 +1,16 @@
 // express_demo.js 文件
 // 导入 app.js
+const crypto = require('node:crypto')
+const { type } = require('node:os')
 const bodyParser = require('body-parser')
 const express = require('express')
 
 const app = express()
 app.use(bodyParser())
+
+function generateUUID() {
+  return crypto.randomBytes(16).toString('hex').replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5')
+}
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*')
@@ -258,6 +264,7 @@ app.get('/api/user/list', (req, res) => {
   }, 1000)
 })
 
+// 根据年月返回相应的作业分布
 app.get('/api/homework/list', (req, res) => {
   const year = req.query.year ?? 1
   const month = req.query.month ?? 10
@@ -265,9 +272,9 @@ app.get('/api/homework/list', (req, res) => {
 
   const result = []
   for (let day = 1; day <= daysInMonth; day++) {
-    // 生成随机的count值，这里简单地假设count在1到100之间
-    const count = Math.floor(Math.random() * 100) + 1
-    result.push({ day, count })
+    // 随机生成0或者0-9以内的随机数
+    const count = (Math.random() < 0.5 ? 0 : Math.floor(Math.random() * 10))
+    result.push({ id: generateUUID(), day, count })
   }
 
   setTimeout(() => {
@@ -276,7 +283,46 @@ app.get('/api/homework/list', (req, res) => {
       message: '获取成功！',
       data: result,
     })
-  }, 1500)
+  }, 500)
+})
+
+// 根据日期获取作业列表
+app.get('/api/homework/detail', (req, res) => {
+  const day = req.query.day
+  const count = req.query.count
+  if (!day || !count) {
+    res.send({
+      code: -1,
+      message: '参数不对',
+    })
+  }
+  const result = {
+    count,
+    page_no: '1',
+    page_size: '10',
+    list: [],
+  }
+
+  for (let i = 0; i < result.count; i++) {
+    result.list.push({
+      id: generateUUID(),
+      type: Math.random() > 0.5 ? 0 : 1,
+      title: `${day}号家庭作业作业${i + 1}`,
+      status: Math.floor(Math.random() * 3) + 1,
+      start_time: Math.floor(new Date().getTime() / 1000),
+      end_time: (new Date().getTime() + Math.floor(Math.random() * 10) * 60 * 60 * 1000) / 1000,
+      total: Math.floor(Math.random() * 100),
+      done: Math.floor(Math.random() * 10),
+    })
+  }
+
+  setTimeout(() => {
+    res.send({
+      code: 0,
+      message: '获取成功！',
+      data: result,
+    })
+  }, 1000)
 })
 
 app.listen(8081, () => {

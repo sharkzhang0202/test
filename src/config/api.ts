@@ -9,6 +9,7 @@ const path = {
   getUserInfo: '/user/info',
   getUserList: '/user/list',
   getHomeworkList: '/homework/list',
+  getHomeworkDetail: '/homework/detail',
 } as const
 
 type ApiKeys = keyof typeof path
