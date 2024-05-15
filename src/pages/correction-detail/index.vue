@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import * as echarts from 'echarts'
 import type { ECOption } from '~/widgets/guodu-echarts/echarts'
 
 const chartData1 = ref<ECOption>({
@@ -95,7 +94,6 @@ const chartData1 = ref<ECOption>({
         </view>
         <view class="h-310rpx w-full">
           <GuoduEcharts
-            ref="echarts"
             :options="chartData1" canvas-id="chartData1"
           />
         </view>
